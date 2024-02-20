@@ -1,8 +1,8 @@
-﻿using Catelog.API.Data;
-using Catelog.API.Entities;
+﻿using Catalog.API.Data;
+using Catalog.API.Entities;
 using MongoDB.Driver;
 
-namespace Catelog.API.Repositories;
+namespace Catalog.API.Repositories;
 
 public class ProductRepository(ICatalogContext context) : IProductRepository
 {

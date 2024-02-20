@@ -1,4 +1,4 @@
-﻿namespace Catelog.API.Data;
+﻿namespace Catalog.API.Data;
 
 public class DbSettings
 {

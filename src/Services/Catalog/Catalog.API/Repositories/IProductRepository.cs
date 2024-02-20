@@ -1,6 +1,6 @@
-﻿using Catelog.API.Entities;
+﻿using Catalog.API.Entities;
 
-namespace Catelog.API.Repositories;
+namespace Catalog.API.Repositories;
 
 public interface IProductRepository
 {
