@@ -8,10 +8,6 @@ public class CatalogContext : ICatalogContext
 {
     public CatalogContext(IOptions<DbSettings> dbSettings)
     {
-        System.Console.WriteLine("*****************");
-        System.Console.WriteLine(dbSettings.Value.ConnectionString);
-        System.Console.WriteLine("*****************");
-
         var client = new MongoClient(dbSettings.Value.ConnectionString);
         var database = client.GetDatabase(dbSettings.Value.DatabaseName);
 
