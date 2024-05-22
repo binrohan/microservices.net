@@ -6,7 +6,7 @@ namespace Discount.API.Extensions;
 
 public static class HostExtensions
 {
-    public static IHost MigrateDatabase<TContext>(this IHost host, int retry = 0)
+    public static IHost SeedDatabase<TContext>(this IHost host, int retry = 0)
     {
         using var scope = host.Services.CreateScope();
         
@@ -50,7 +50,7 @@ public static class HostExtensions
             if (retry < 50)
             {
                 Thread.Sleep(2000);
-                MigrateDatabase<TContext>(host, ++retry);
+                SeedDatabase<TContext>(host, ++retry);
             }
         }
 
