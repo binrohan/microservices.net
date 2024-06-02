@@ -10,9 +10,9 @@ public class DiscountService(IDiscountRepository repo,
                              ILogger<DiscountService> logger,
                              IMapper mapper) : DiscountProtoService.DiscountProtoServiceBase
 {
-    private readonly IDiscountRepository _repo = repo;
-    private readonly ILogger<DiscountService> _logger = logger;
-    private readonly IMapper _mapper = mapper;
+    private readonly IDiscountRepository _repo = repo ?? throw new ArgumentNullException(nameof(repo));
+    private readonly ILogger<DiscountService> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    private readonly IMapper _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
 
     public override async Task<CouponModel> GetDiscount(GetDiscountRequest request, ServerCallContext context)
     {
