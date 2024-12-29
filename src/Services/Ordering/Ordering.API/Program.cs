@@ -1,9 +1,19 @@
+using MediatR;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
+using Ordering.Application;
+using Ordering.Application.Features.Commands.CheckoutOrder;
+using Ordering.Application.Features.Commands.DeleteOrder;
+using Ordering.Application.Features.Commands.UpdateOrder;
+using Ordering.Application.Features.Queries.GetOrdersList;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddApplicationServices();
 
 var app = builder.Build();
 
@@ -14,25 +24,41 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
+var api = app.MapGroup("api/v1/order");
 
-app.MapGet("/weatherforecast", () =>
+api.MapGet("{userName}", async ([FromRoute] string userName, [FromServices] IMediator mediator)
+    => Results.Ok(await mediator.Send(new GetOrdersListQuery(userName))))
+   .WithName("GetOrder")
+   .Produces<IEnumerable<OrdersDto>>(StatusCodes.Status200OK);
+
+api.MapPost("/", async ([FromBody] CheckoutOrderCommand command, [FromServices] IMediator mediator) =>
 {
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
+    _ = mediator ?? throw new ArgumentNullException(nameof(mediator));
+    return Results.Ok(await mediator.Send(command));
 })
-.WithName("GetWeatherForecast")
-.WithOpenApi();
+.WithName("CheckoutOrder")
+.Produces<int>(StatusCodes.Status200OK);
+
+api.MapPut("/", async ([FromBody] UpdateOrderCommand command, [FromServices] IMediator mediator) =>
+{
+    _ = mediator ?? throw new ArgumentNullException(nameof(mediator));
+    await mediator.Send(command);
+    return Results.NoContent();
+})
+.WithName("UpdateOrder")
+.WithDescription("Testing Only, Mainly it will be call from GRPC.")
+.Produces<int>(StatusCodes.Status204NoContent)
+.Produces(StatusCodes.Status404NotFound);
+
+api.MapDelete("/", async ([FromBody] DeleteOrderCommand command, [FromServices] IMediator mediator) =>
+{
+    _ = mediator ?? throw new ArgumentNullException(nameof(mediator));
+    await mediator.Send(command);
+    return Results.NotFound();
+})
+.WithName("DeleteOrder")
+.Produces(StatusCodes.Status204NoContent)
+.Produces(StatusCodes.Status404NotFound);
 
 app.Run();
 
