@@ -5,8 +5,8 @@ namespace Ordering.Domain.Common;
 public abstract class EntityBase
 {
     public int Id { get; set; }
-    public required string CreateBy { get; set; }
+    public string CreatedBy { get; set; } = null!;
     public DateTime CreatedDate { get; set; }
-    public required string LastModifiedBy { get; set; }
+    public string LastModifiedBy { get; set; } = null!;
     public DateTime? LastModifiedDate { get; set; }
 }

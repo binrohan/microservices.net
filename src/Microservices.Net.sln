@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{0E426923-3A57-4BED-9BF2-677B9EC97350}"
+	ProjectSection(SolutionItems) = preProject
+		commands.md = commands.md
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Catalog", "Catalog", "{CFDAF235-5C87-4ED2-9B77-34D36D1BF354}"
 EndProject
