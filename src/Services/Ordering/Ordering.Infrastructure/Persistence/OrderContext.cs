@@ -27,4 +27,14 @@ public class OrderContext(DbContextOptions<OrderContext> options) : DbContext(op
 
         return base.SaveChangesAsync(cancellationToken);
     }
+
+    protected override void OnModelCreating(ModelBuilder builder)
+    {
+
+        builder.Entity<Order>()
+               .Property(p => p.TotalPrice)
+               .HasColumnType("decimal(18,4)");
+
+        base.OnModelCreating(builder);
+    }
 }
