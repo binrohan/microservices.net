@@ -1,7 +1,7 @@
-version: '3.4'
+version: "3.4"
 
 services:
-  catalogdb: 
+  catalogdb:
     container_name: catalogdb
     restart: always
     ports:
@@ -26,10 +26,20 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-  
+
+  orderdb:
+    container_name: orderdb
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=SwN12345678
+      # - MSSQL_PID=Developer
+    restart: always
+    ports:
+      - "1433:1433"
+
   pgadmin:
     container_name: pgadmin
-    environment: 
+    environment:
       - PGADMIN_DEFAULT_EMAIL=admin@bismarck.com
       - PGADMIN_DEFAULT_PASSWORD=admin1234
     restart: always
@@ -108,4 +118,3 @@ services:
       - discountdb
     ports:
       - "8003:8080"
-
