@@ -58,8 +58,9 @@ api.MapPut("/", async ([FromBody] UpdateOrderCommand command, [FromServices] IMe
 .Produces<int>(StatusCodes.Status204NoContent)
 .Produces(StatusCodes.Status404NotFound);
 
-api.MapDelete("/", async ([FromBody] DeleteOrderCommand command, [FromServices] IMediator mediator) =>
+api.MapDelete("{id}", async ([FromRoute] int id, [FromServices] IMediator mediator) =>
 {
+    var command = new DeleteOrderCommand() { Id = id };
     _ = mediator ?? throw new ArgumentNullException(nameof(mediator));
     await mediator.Send(command);
     return Results.NotFound();
