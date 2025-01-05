@@ -55,7 +55,7 @@ api.MapPut("/", async ([FromBody] UpdateOrderCommand command, [FromServices] IMe
 })
 .WithName("UpdateOrder")
 .WithDescription("Testing Only, Mainly it will be call from GRPC.")
-.Produces<int>(StatusCodes.Status204NoContent)
+.Produces(StatusCodes.Status204NoContent)
 .Produces(StatusCodes.Status404NotFound);
 
 api.MapDelete("{id}", async ([FromRoute] int id, [FromServices] IMediator mediator) =>
@@ -63,7 +63,7 @@ api.MapDelete("{id}", async ([FromRoute] int id, [FromServices] IMediator mediat
     var command = new DeleteOrderCommand() { Id = id };
     _ = mediator ?? throw new ArgumentNullException(nameof(mediator));
     await mediator.Send(command);
-    return Results.NotFound();
+    return Results.NoContent();
 })
 .WithName("DeleteOrder")
 .Produces(StatusCodes.Status204NoContent)
