@@ -5,6 +5,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi.Models;
 using Discount.Grpc.Protos;
 using MassTransit;
+using Grpc.Core;
+using System.Reflection;
+using AutoMapper;
+using EventBus.Messages.Events;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,7 +20,7 @@ builder.Services.AddStackExchangeRedisCache(options => { options.Configuration =
 builder.Services.AddScoped<IBasketRepository, BasketRepository>();
 builder.Services.AddGrpcClient<DiscountProtoService.DiscountProtoServiceClient>(options => options.Address = new Uri(builder.Configuration.GetValue<string>("GrpcSettings:DiscountUrl")!));
 builder.Services.AddScoped<DiscountGrpcService>();
-
+builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
 builder.Services.AddMassTransit(config =>
 {
     config.UsingRabbitMq((ctx, cfg) =>
@@ -38,7 +42,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.MapGet("/api/v1/basket/{username}", async ([FromServices] IBasketRepository repo, [FromRoute] string username) =>
+app.MapGet("/api/v1/basket/{username}", async ([FromServices] IBasketRepository repo,
+                                               [FromRoute] string username) =>
 {
     var basket = await repo.GetBasket(username);
     return Results.Ok(basket ?? new ShoppingCart(username));
@@ -58,14 +63,35 @@ app.MapPost("/api/v1/basket", async ([FromServices] IBasketRepository repo,
 
     return Results.Ok(await repo.UpdateBasket(basket));
 })
-.Produces<ShoppingCart>(StatusCodes.Status200OK);
+.Produces<ShoppingCart>(StatusCodes.Status200OK)
+.WithName("UpdateBasket");
 
-app.MapDelete("/api/v1/basket/{username}", async ([FromServices] IBasketRepository repo, [FromRoute] string username) =>
+app.MapDelete("/api/v1/basket/{username}", async ([FromServices] IBasketRepository repo,
+                                                  [FromRoute] string username) =>
 {
     await repo.DeleteBasket(username);
     return Results.Ok();
 })
 .Produces(StatusCodes.Status200OK)
 .WithName("DeleteBasket");
+
+app.MapPost("/api/v1/basket/checkout", async ([FromServices] IBasketRepository repo,
+                                              [FromServices] IMapper mapper,
+                                              [FromServices] IPublishEndpoint publishEndpoint,
+                                              [FromBody] BasketCheckout basketCheckout) =>
+{
+    var basket = await repo.GetBasket(basketCheckout.UserName);
+    if (basket == null) return Results.BadRequest();
+
+    var eventMessage = mapper.Map<BasketCheckoutEvent>(basketCheckout);
+    eventMessage.TotalPrice = basket.TotalPrice;
+    await publishEndpoint.Publish(eventMessage);
+
+    await repo.DeleteBasket(basket.UserName);
+    return Results.Accepted();
+})
+.Produces(StatusCodes.Status202Accepted)
+.Produces(StatusCodes.Status400BadRequest)
+.WithName("CheckoutBasket");
 
 app.Run();
