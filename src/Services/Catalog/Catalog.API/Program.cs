@@ -25,10 +25,12 @@ if (app.Environment.IsDevelopment())
 
 //app.UseHttpsRedirection();
 
-app.MapGet("/products", async ([FromServices] IProductRepository repo) => Results.Ok(await repo.GetProducts()))
+var api = app.MapGroup("/api/v1/catalog");
+
+api.MapGet("/", async ([FromServices] IProductRepository repo) => Results.Ok(await repo.GetProducts()))
 .Produces<IEnumerable<Product>>(StatusCodes.Status200OK);
 
-app.MapGet("/products/{id:length(24)}", async ([FromServices] IProductRepository repo,
+api.MapGet("/{id:length(24)}", async ([FromServices] IProductRepository repo,
                                                [FromServices] ILogger<Product> logger,
                                                [FromRoute] string id) =>
 {
@@ -46,12 +48,12 @@ app.MapGet("/products/{id:length(24)}", async ([FromServices] IProductRepository
 .Produces<Product>(StatusCodes.Status200OK)
 .WithName("GetProduct");
 
-app.MapGet("/products/by-category/{category}", async ([FromServices] IProductRepository repo, [FromRoute] string category)
+api.MapGet("/by-category/{category}", async ([FromServices] IProductRepository repo, [FromRoute] string category)
     => await repo.GetProductsByCategory(category))
 .Produces<IEnumerable<Product>>(StatusCodes.Status200OK)
 .WithName("GetProductsByCategory");
 
-app.MapGet("/products/by-name/{name}", async ([FromServices] IProductRepository repo,
+api.MapGet("/by-name/{name}", async ([FromServices] IProductRepository repo,
                                               [FromServices] ILogger<Product> logger,
                                               [FromRoute] string name) =>
 {
@@ -69,7 +71,7 @@ app.MapGet("/products/by-name/{name}", async ([FromServices] IProductRepository 
 .Produces<Product>(StatusCodes.Status200OK)
 .WithName("GetProductByName");
 
-app.MapPost("/products", async ([FromServices] IProductRepository repo, [FromBody] Product product) =>
+api.MapPost("/", async ([FromServices] IProductRepository repo, [FromBody] Product product) =>
 {
     await repo.CreateProduct(product);
 
@@ -77,11 +79,11 @@ app.MapPost("/products", async ([FromServices] IProductRepository repo, [FromBod
 })
 .Produces<Product>(StatusCodes.Status200OK);
 
-app.MapPut("/products", async ([FromServices] IProductRepository repo, [FromBody] Product product)
+api.MapPut("/", async ([FromServices] IProductRepository repo, [FromBody] Product product)
     => Results.Ok(await repo.UpdateProduct(product)))
 .Produces<bool>(StatusCodes.Status200OK);
 
-app.MapDelete("/products/{id:length(24)}", async ([FromServices] IProductRepository repo, [FromRoute] string id)
+api.MapDelete("/{id:length(24)}", async ([FromServices] IProductRepository repo, [FromRoute] string id)
     => Results.Ok(await repo.DeleteProduct(id)))
 .Produces<bool>(StatusCodes.Status200OK)
 .WithName("DeleteProduct");
