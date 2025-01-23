@@ -17,3 +17,5 @@ Build:
 `
 
 ## DOTNET CLI
+### Api Gateway
+Local: `dotnet run --launch-profile "OcelotApiGwLocal"`
